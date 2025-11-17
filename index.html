@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Clientes - KAIZEN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            min-height: calc(100vh - 56px);
+            padding: 0;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+        }
+        
+        .badge-potencia-alta {
+            background-color: var(--success-color);
+        }
+        
+        .badge-potencia-media {
+            background-color: var(--warning-color);
+        }
+        
+        .badge-potencia-baja {
+            background-color: var(--danger-color);
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .visita-row:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .region-badge {
+            font-size: 0.75rem;
+        }
+        
+        .client-map {
+            height: 400px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+        }
+        
+        .tab-content {
+            padding: 20px 0;
+        }
+        
+        .client-filter {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .export-buttons {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDNINUMzLjg5IDMgMyAzLjkgMyA1VjE5QzMgMjAuMSAzLjkgMjEgNSAyMUgxOUMyMC4xIDIxIDIxIDIwLjEgMjEgMTlWNUMyMSAzLjkgMjAuMSAzIDE5IDNaTTUgNUgxOUwxOSAxOUg1VjVaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNyA3SDE3VjEwSDdWN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik03IDEySDE3VjE1SDdWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNyAxN0gxM1YyMEg3VjE3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
+                KAIZEN - Sistema de Clientes
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Clientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Visitas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reportes</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Exportar
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="exportPdfClientes">Clientes (PDF)</a></li>
+                            <li><a class="dropdown-item" href="#" id="exportExcelClientes">Clientes (Excel)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="exportPdfVisitas">Visitas (PDF)</a></li>
+                            <li><a class="dropdown-item" href="#" id="exportExcelVisitas">Visitas (Excel)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="exportPdfCompleto">Reporte Completo (PDF)</a></li>
+                            <li><a class="dropdown-item" href="#" id="exportExcelCompleto">Reporte Completo (Excel)</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 col-md-3 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#clientes">
+                                <i class="fas fa-users me-2"></i> Todos los Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#visitas">
+                                <i class="fas fa-calendar-check me-2"></i> Plan de Visitas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#potencial">
+                                <i class="fas fa-chart-line me-2"></i> Potencial de Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#distribucion">
+                                <i class="fas fa-map-marked-alt me-2"></i> Distribución por Región
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#historial">
+                                <i class="fas fa-history me-2"></i> Historial de Visitas
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-10 col-md-9 ms-sm-auto px-md-4 py-4">
+                <!-- Export Buttons -->
+                <div class="export-buttons">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" id="exportPdfClientesTop">
+                            <i class="fas fa-file-pdf me-2"></i>Exportar Clientes (PDF)
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="exportExcelClientesTop">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Clientes (Excel)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="exportPdfVisitasTop">
+                            <i class="fas fa-file-pdf me-2"></i>Exportar Visitas (PDF)
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="exportExcelVisitasTop">
+                            <i class="fas fa-file-excel me-2"></i>Exportar Visitas (Excel)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            Total Clientes</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">128</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            Alta Potencia</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">28</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-star fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            Visitas Este Mes</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">64</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            Facturación Mensual</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">Q 42,580</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="clientes-tab" data-bs-toggle="tab" data-bs-target="#clientes" type="button" role="tab">Todos los Clientes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="visitas-tab" data-bs-toggle="tab" data-bs-target="#visitas" type="button" role="tab">Plan de Visitas</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="potencial-tab" data-bs-toggle="tab" data-bs-target="#potencial" type="button" role="tab">Potencial de Clientes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="distribucion-tab" data-bs-toggle="tab" data-bs-target="#distribucion" type="button" role="tab">Distribución</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">Historial</button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="myTabContent">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Resumen de Actividad</h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                Este Mes
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Esta Semana</a></li>
+                                                <li><a class="dropdown-item" href="#">Este Mes</a></li>
+                                                <li><a class="dropdown-item" href="#">Este Trimestre</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="activityChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Distribución por Región</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="regionChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Próximas Visitas</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Cliente</th>
+                                                        <th>Fecha</th>
+                                                        <th>Hora</th>
+                                                        <th>Estado</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="upcomingVisits">
+                                                    <!-- Las próximas visitas se cargarán aquí -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Clientes por Potencial</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="potentialChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clientes Tab -->
+                    <div class="tab-pane fade" id="clientes" role="tabpanel">
+                        <div class="client-filter">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="regionFilter" class="form-label">Región</label>
+                                    <select class="form-select" id="regionFilter">
+                                        <option value="">Todas las regiones</option>
+                                        <option value="Montaña Baja">Montaña Baja</option>
+                                        <option value="Montaña Alta">Montaña Alta</option>
+                                        <option value="Huehuetenango Cabecera">Huehuetenango Cabecera</option>
+                                        <option value="Aledaños Xela">Aledaños Xela</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="potentialFilter" class="form-label">Potencial</label>
+                                    <select class="form-select" id="potentialFilter">
+                                        <option value="">Todos</option>
+                                        <option value="Alta">Alta</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Baja">Baja</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="municipioFilter" class="form-label">Municipio</label>
+                                    <input type="text" class="form-control" id="municipioFilter" placeholder="Filtrar por municipio">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="searchClient" class="form-label">Buscar Cliente</label>
+                                    <input type="text" class="form-control" id="searchClient" placeholder="Nombre del cliente">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Lista de Clientes</h5>
+                                <span class="badge bg-primary" id="clientCount">128 clientes</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Teléfono</th>
+                                                <th>Dirección</th>
+                                                <th>Municipio</th>
+                                                <th>Región</th>
+                                                <th>Potencial</th>
+                                                <th>Última Visita</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="clientTable">
+                                            <!-- Los clientes se cargarán aquí -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav aria-label="Client pagination">
+                                    <ul class="pagination justify-content-center" id="clientPagination">
+                                        <!-- La paginación se generará aquí -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visitas Tab -->
+                    <div class="tab-pane fade" id="visitas" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Plan de Visitas</h5>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary me-2" id="prevDay">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                            <span id="currentDate">15 Enero 2024</span>
+                                            <button class="btn btn-sm btn-outline-primary ms-2" id="nextDay">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="timeline" id="visitTimeline">
+                                            <!-- El plan de visitas se cargará aquí -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Resumen del Día</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span>Total clientes a visitar:</span>
+                                            <strong id="totalClientsDay">6</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span>Tiempo total estimado:</span>
+                                            <strong id="totalTimeDay">4h 30m</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span>Distancia estimada:</span>
+                                            <strong id="totalDistance">42 km</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span>Potencial de venta:</span>
+                                            <strong id="salePotential">Alto</strong>
+                                        </div>
+                                        <button class="btn btn-primary w-100 mt-3">Generar Ruta Optimizada</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Clientes para Mañana</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush" id="tomorrowVisits">
+                                            <!-- Los clientes para mañana se cargarán aquí -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Potencial Tab -->
+                    <div class="tab-pane fade" id="potencial" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Análisis de Potencial de Clientes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="potentialAnalysisChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Clientes de Alta Potencia</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="list-group" id="highPotentialClients">
+                                            <!-- Clientes de alta potencia se cargarán aquí -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Segmentación de Clientes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Segmento</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Ventas Promedio</th>
+                                                        <th>Frecuencia de Visita</th>
+                                                        <th>Acciones Recomendadas</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><span class="badge bg-success">Alta Potencia</span></td>
+                                                        <td>28</td>
+                                                        <td>Q 1,850</td>
+                                                        <td>2 veces/mes</td>
+                                                        <td>Mantener relación, ofrecer nuevos productos</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-warning">Media Potencia</span></td>
+                                                        <td>45</td>
+                                                        <td>Q 850</td>
+                                                        <td>1 vez/mes</td>
+                                                        <td>Incrementar frecuencia, educar sobre productos</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span class="badge bg-danger">Baja Potencia</span></td>
+                                                        <td>55</td>
+                                                        <td>Q 320</td>
+                                                        <td>1 vez/2 meses</td>
+                                                        <td>Evaluar rentabilidad, considerar descarte</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Distribución Tab -->
+                    <div class="tab-pane fade" id="distribucion" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Mapa de Distribución de Clientes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="client-map">
+                                            <div class="text-center">
+                                                <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                                                <p>Mapa interactivo de clientes por región</p>
+                                                <small>Los puntos representan la ubicación de los clientes</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Clientes por Municipio</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="municipioChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Distribución por Región</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Región</th>
+                                                        <th>Clientes</th>
+                                                        <th>% del Total</th>
+                                                        <th>Potencial Promedio</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Montaña Baja</td>
+                                                        <td>32</td>
+                                                        <td>25%</td>
+                                                        <td><span class="badge bg-warning">Media</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Montaña Alta</td>
+                                                        <td>42</td>
+                                                        <td>33%</td>
+                                                        <td><span class="badge bg-success">Alta</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Huehuetenango Cabecera</td>
+                                                        <td>39</td>
+                                                        <td>30%</td>
+                                                        <td><span class="badge bg-warning">Media</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Aledaños Xela</td>
+                                                        <td>15</td>
+                                                        <td>12%</td>
+                                                        <td><span class="badge bg-danger">Baja</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Eficiencia por Región</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="efficiencyChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial Tab -->
+                    <div class="tab-pane fade" id="historial" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Filtrar Historial</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="historialClient" class="form-label">Cliente</label>
+                                            <select class="form-select" id="historialClient">
+                                                <option value="">Todos los clientes</option>
+                                                <!-- Las opciones se cargarán dinámicamente -->
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="historialDateFrom" class="form-label">Desde</label>
+                                            <input type="date" class="form-control" id="historialDateFrom">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="historialDateTo" class="form-label">Hasta</label>
+                                            <input type="date" class="form-control" id="historialDateTo">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="historialResult" class="form-label">Resultado</label>
+                                            <select class="form-select" id="historialResult">
+                                                <option value="">Todos</option>
+                                                <option value="Venta">Venta</option>
+                                                <option value="Seguimiento">Seguimiento</option>
+                                                <option value="No atendido">No atendido</option>
+                                                <option value="Cancelado">Cancelado</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary w-100" id="filterHistory">Filtrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Historial de Visitas</h5>
+                                        <span class="badge bg-primary" id="historyCount">640 visitas</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Fecha</th>
+                                                        <th>Cliente</th>
+                                                        <th>Duración</th>
+                                                        <th>Resultado</th>
+                                                        <th>Productos</th>
+                                                        <th>Observaciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="historyTable">
+                                                    <!-- El historial se cargará aquí -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <nav aria-label="History pagination">
+                                            <ul class="pagination justify-content-center" id="historyPagination">
+                                                <!-- La paginación se generará aquí -->
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para detalles del cliente -->
+    <div class="modal fade" id="clientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientModalTitle">Detalles del Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Información de Contacto</h6>
+                            <p><strong>Nombre:</strong> <span id="modalClientName"></span></p>
+                            <p><strong>Teléfono:</strong> <span id="modalClientPhone"></span></p>
+                            <p><strong>Dirección:</strong> <span id="modalClientAddress"></span></p>
+                            <p><strong>Municipio:</strong> <span id="modalClientMunicipio"></span></p>
+                            <p><strong>Región:</strong> <span id="modalClientRegion"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Estadísticas</h6>
+                            <p><strong>Potencial:</strong> <span id="modalClientPotential"></span></p>
+                            <p><strong>Total Visitas:</strong> <span id="modalClientTotalVisits"></span></p>
+                            <p><strong>Última Visita:</strong> <span id="modalClientLastVisit"></span></p>
+                            <p><strong>Productos de Interés:</strong> <span id="modalClientProducts"></span></p>
+                            <p><strong>Estado:</strong> <span id="modalClientStatus"></span></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6>Últimas 5 Visitas</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Duración</th>
+                                    <th>Resultado</th>
+                                    <th>Productos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalClientVisits">
+                                <!-- Las visitas se cargarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Programar Visita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+    <script>
+        // Reemplaza con tu propio kit de FontAwesome
+        document.head.innerHTML += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">';
+        
+        // Datos de clientes - Montaña Baja (solo primeros 10 para ejemplo)
+        const clientesMontanaBaja = [
+            {id: 1, nombre: "Dr Leonel Pérez", telefono: "7773-8163", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Media", observaciones: "No estuvo toda la semana"},
+            {id: 2, nombre: "Dra Yoselin", telefono: "7773-8033", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Baja", observaciones: "No se encontraba la Doctora, solamente deje listado y muestras"},
+            {id: 3, nombre: "Dr Sergio Pais", telefono: "5524-8253", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Media", observaciones: "Hay que seguir visitando"},
+            {id: 4, nombre: "Dr Elder Ivan", telefono: "3905-7559", direccion: "Camoja Grande", municipio: "Camoja Grande", region: "Montaña Baja", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 5, nombre: "Dr Leobardo", telefono: "3009-5535", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Baja", observaciones: "Aún tiene medicamento"},
+            {id: 6, nombre: "Dr Sarbelio Mejía", telefono: "4484-9150", direccion: "San Pedro Necta", municipio: "San Pedro Necta", region: "Montaña Baja", potencia: "Baja", observaciones: "Por la calle no está reciendo pacientes"},
+            {id: 7, nombre: "Dr Gerardo Hernández", telefono: "4087-9945", direccion: "San Pedro Necta", municipio: "San Pedro Necta", region: "Montaña Baja", potencia: "Alta", observaciones: "Cancelo su factura"},
+            {id: 8, nombre: "Dr. Omar Villatoro", telefono: "5377-4073", direccion: "San Pedro Necta", municipio: "San Pedro Necta", region: "Montaña Baja", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 9, nombre: "Farmacia Luna", telefono: "4548-8537", direccion: "San Antonio Huista", municipio: "San Antonio Huista", region: "Montaña Baja", potencia: "Alta", observaciones: "Compro Medicamento y Cancelo su factura"},
+            {id: 10, nombre: "Dr César Camposeco", telefono: "3025-6812", direccion: "Santa Ana Huista", municipio: "Santa Ana Huista", region: "Montaña Baja", potencia: "Alta", observaciones: "Cancelo su factura"}
+        ];
+
+        // Datos de clientes - Montaña Alta (solo primeros 10 para ejemplo)
+        const clientesMontanaAlta = [
+            {id: 11, nombre: "Farmacia Lili", telefono: "5725-3720", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "La descartaré para la siguiente visita"},
+            {id: 12, nombre: "Farmacia Flor de mi Tierra", telefono: "3562-4922", direccion: "Aguacatan, una cuadra antes del semáforo", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "No está comprando, al parecer cerrará la farmacia"},
+            {id: 13, nombre: "Farmacia Galicia", telefono: "5839-9583", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "Estaba cerrado"},
+            {id: 14, nombre: "Dra Marta García", telefono: "5883-9940", direccion: "Aguacatan, debajo del Dr Keiner", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Media", observaciones: "Recibió visita, verá existencias y se comunicará conmigo"},
+            {id: 15, nombre: "Dr Keiner Gómez", telefono: "4893-9499", direccion: "Aguacatan, arriba de la Dra Marta", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Alta", observaciones: "Interesado en Dastyl C"},
+            {id: 16, nombre: "Dr Luis Quiñónez", telefono: "5892-4849", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "No estaba atendiendo"},
+            {id: 17, nombre: "Dr Jorge Luis", telefono: "4134-7898", direccion: "Chiantla, después de las clínicas de la cooperativa", municipio: "Chiantla", region: "Montaña Alta", potencia: "Baja", observaciones: "No se encontraba"},
+            {id: 18, nombre: "Farmacia Emanuel", telefono: "5874-3821", direccion: "Chiantla, frente al parque central", municipio: "Chiantla", region: "Montaña Alta", potencia: "Alta", observaciones: "Va a depositar su factura, o al menos un abono"},
+            {id: 19, nombre: "Farmacia Fresca Unción", telefono: "3524-3283", direccion: "Chiantla, frente a la plaza de bestias", municipio: "Chiantla", region: "Montaña Alta", potencia: "Baja", observaciones: "Estaba cerrado"},
+            {id: 20, nombre: "Farmacia de León", telefono: "3110-6110", direccion: "Chiantla, Aldea Agua Alegre", municipio: "Chiantla", region: "Montaña Alta", potencia: "Alta", observaciones: "Compro Aspek"}
+        ];
+
+        // Datos de clientes - Huehuetenango Cabecera (solo primeros 10 para ejemplo)
+        const clientesHuehuetenango = [
+            {id: 21, nombre: "Dr Pablo Elías", telefono: "4151-9004", direccion: "Zona 8, camino al semaforo", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Media", observaciones: "Aún en proceso de que tenga un espacio para comprar"},
+            {id: 22, nombre: "Dr Brayan Gómez", telefono: "5198-9469", direccion: "Zona 11, al lado de distribuidora la bendicion", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Aún tiene medicamento"},
+            {id: 23, nombre: "Dr Aarón", telefono: "5052-5292", direccion: "Zona 5, al lado del colegio palabra en acción", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Lo visité en Chiantla, pero tienen medicamento"},
+            {id: 24, nombre: "Dr Abdias Martínez", telefono: "7913-9462", direccion: "Zona 11, semáforo de vitatrac a la izquierda", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Creo que 3 visitas más y dejo de visitarlo"},
+            {id: 25, nombre: "Dr Julio Octavio", telefono: "3883 1442", direccion: "Zona 11, zentroplaza camino a intervida", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 26, nombre: "Dra Ingrid Roldán", telefono: "5371-6407", direccion: "Zona 11, plaza once", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 27, nombre: "Dra Janya", telefono: "3252-4696", direccion: "Zona 5, al lado del colegio palabra en acción", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Lo visité en Chiantla, pero tienen medicamento"},
+            {id: 28, nombre: "Farmacia Castillo Fuerte", telefono: "4552-6713", direccion: "Zona 12, camino a barberia los parceros", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Media", observaciones: "Pendiente de fecha de visita ya que no ha estado"},
+            {id: 29, nombre: "Dr Juan Lizandro", telefono: "4149-4479", direccion: "Zona 1, parque del calvario a la derecha", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 30, nombre: "Hospital Altuve", telefono: "7764-1436", direccion: "Zona 5, calzada", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "La Administradora no estaba atendiendo visita médica"}
+        ];
+
+        // Datos de clientes - Aledaños Xela (solo primeros 10 para ejemplo)
+        const clientesAledanosXela = [
+            {id: 31, nombre: "Farmacia RS", telefono: "4585-6535", direccion: "Al lado del parque donde hay mercado, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "Descarte para la siguiente visita"},
+            {id: 32, nombre: "Farmacia Verbo", telefono: "5033-3435", direccion: "Una calle de retorno a Huehue a mano derecha, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
+            {id: 33, nombre: "Dr Gerber Capriel", telefono: "5705-1503", direccion: "Salida hacia Cuilco, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "No estan comprando"},
+            {id: 34, nombre: "Farmacia La Paz", telefono: "4603-2453", direccion: "Colotenango, frente al parqueo municipal", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
+            {id: 35, nombre: "Alejandro Sanchez", telefono: "5808-1048", direccion: "carretera de salida hacia huehuetenango, Cuilco", municipio: "Cuilco", region: "Aledaños Xela", potencia: "Alta", observaciones: "Compro Aspek"},
+            {id: 36, nombre: "Dr Nerio Castillo", telefono: "5033-3435", direccion: "una calle a la derecha del parque municipal, Ixthahuacán", municipio: "Ixthahuacán", region: "Aledaños Xela", potencia: "Baja", observaciones: "No está comprando medicamento"},
+            {id: 37, nombre: "Sebastina", telefono: "3056-6648", direccion: "Frente al parque, San Sebastián", municipio: "San Sebastián", region: "Aledaños Xela", potencia: "Baja", observaciones: "Tiene Kaizezol todavía"},
+            {id: 38, nombre: "Dr Renigio", telefono: "4760-2300", direccion: "San Juan Atitan, en aldra Santa Isabel", municipio: "San Juan Atitan", region: "Aledaños Xela", potencia: "Media", observaciones: "Está en construcción de hospital en aldea Santa Isabel"},
+            {id: 39, nombre: "Farmacia San Miguel", telefono: "3252-4696", direccion: "a orilla de carretera interamericana, Pologua", municipio: "Pologua", region: "Aledaños Xela", potencia: "Baja", observaciones: "Tenía cerrada su farmacia"},
+            {id: 40, nombre: "Farmacia Israel", telefono: "3013-0095", direccion: "calle principal pologua, Pologua", municipio: "Pologua", region: "Aledaños Xela", potencia: "Alta", observaciones: "Abono a su factura"}
+        ];
+
+        // Combinar todos los clientes
+        const todosClientes = [
+            ...clientesMontanaBaja,
+            ...clientesMontanaAlta,
+            ...clientesHuehuetenango,
+            ...clientesAledanosXela
+        ];
+
+        // Generar visitas para cada cliente (5 visitas por cliente)
+        const todasLasVisitas = [];
+        
+        // Productos disponibles
+        const productos = ["Kaizezol", "Dastyl C", "Aspek", "Celecoxib", "Pantoprazol", "Arginina"];
+        
+        // Resultados posibles
+        const resultados = ["Venta", "Seguimiento", "No atendido", "Cancelado"];
+        
+        // Generar fechas aleatorias en los últimos 6 meses
+        function generarFechaAleatoria() {
+            const hoy = new Date();
+            const hace6Meses = new Date();
+            hace6Meses.setMonth(hoy.getMonth() - 6);
+            
+            const fecha = new Date(
+                hace6Meses.getTime() + Math.random() * (hoy.getTime() - hace6Meses.getTime())
+            );
+            
+            return fecha.toISOString().split('T')[0];
+        }
+        
+        // Generar hora aleatoria entre 8:00 y 17:00
+        function generarHoraAleatoria() {
+            const hora = Math.floor(Math.random() * 9) + 8; // 8-16
+            const minuto = Math.floor(Math.random() * 60); // 0-59
+            return `${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}`;
+        }
+        
+        // Generar duración aleatoria entre 15 y 45 minutos
+        function generarDuracion() {
+            return Math.floor(Math.random() * 31) + 15; // 15-45 minutos
+        }
+        
+        // Generar tiempo de espera aleatorio entre 0 y 20 minutos
+        function generarTiempoEspera() {
+            return Math.floor(Math.random() * 21); // 0-20 minutos
+        }
+        
+        // Generar productos aleatorios
+        function generarProductos() {
+            const numProductos = Math.floor(Math.random() * 3) + 1; // 1-3 productos
+            const productosSeleccionados = [];
+            
+            for (let i = 0; i < numProductos; i++) {
+                const productoIndex = Math.floor(Math.random() * productos.length);
+                if (!productosSeleccionados.includes(productos[productoIndex])) {
+                    productosSeleccionados.push(productos[productoIndex]);
+                }
+            }
+            
+            return productosSeleccionados.join(", ");
+        }
+        
+        // Generar visitas para todos los clientes
+        todosClientes.forEach(cliente => {
+            for (let i = 0; i < 5; i++) {
+                const fecha = generarFechaAleatoria();
+                const horaInicio = generarHoraAleatoria();
+                const duracion = generarDuracion();
+                const tiempoEspera = generarTiempoEspera();
+                const resultadoIndex = Math.floor(Math.random() * resultados.length);
+                const resultado = resultados[resultadoIndex];
+                const productosVisita = resultado === "Venta" ? generarProductos() : "";
+                
+                // Calcular hora de fin
+                const [hora, minuto] = horaInicio.split(':').map(Number);
+                const totalMinutos = hora * 60 + minuto + duracion + tiempoEspera;
+                const horaFinH = Math.floor(totalMinutos / 60);
+                const horaFinM = totalMinutos % 60;
+                const horaFin = `${horaFinH.toString().padStart(2, '0')}:${horaFinM.toString().padStart(2, '0')}`;
+                
+                todasLasVisitas.push({
+                    id: todasLasVisitas.length + 1,
+                    idCliente: cliente.id,
+                    fecha: fecha,
+                    horaInicio: horaInicio,
+                    horaFin: horaFin,
+                    duracion: duracion,
+                    tiempoEspera: tiempoEspera,
+                    resultado: resultado,
+                    productos: productosVisita,
+                    observaciones: `Visita ${i+1} - ${cliente.observaciones}`
+                });
+            }
+        });
+
+        // Funciones de exportación
+        function exportClientesPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('REPORTE DE CLIENTES - KAIZEN', 105, 15, null, null, 'center');
+            
+            // Fecha
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, null, null, 'center');
+            
+            // Tabla de clientes
+            const headers = [['Nombre', 'Teléfono', 'Dirección', 'Municipio', 'Región', 'Potencial']];
+            const data = todosClientes.map(cliente => [
+                cliente.nombre,
+                cliente.telefono,
+                cliente.direccion,
+                cliente.municipio,
+                cliente.region,
+                cliente.potencia
+            ]);
+            
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 30,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [44, 62, 80],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                margin: { top: 30 }
+            });
+            
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+            }
+            
+            doc.save('clientes_kaizen.pdf');
+        }
+
+        function exportClientesExcel() {
+            // Preparar datos
+            const data = todosClientes.map(cliente => ({
+                'Nombre': cliente.nombre,
+                'Teléfono': cliente.telefono,
+                'Dirección': cliente.direccion,
+                'Municipio': cliente.municipio,
+                'Región': cliente.region,
+                'Potencial': cliente.potencia,
+                'Observaciones': cliente.observaciones
+            }));
+            
+            // Crear libro de trabajo
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            
+            // Añadir hoja al libro
+            XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+            
+            // Guardar archivo
+            XLSX.writeFile(wb, 'clientes_kaizen.xlsx');
+        }
+
+        function exportVisitasPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('HISTORIAL DE VISITAS - KAIZEN', 105, 15, null, null, 'center');
+            
+            // Fecha
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, null, null, 'center');
+            
+            // Tabla de visitas
+            const headers = [['Fecha', 'Cliente', 'Duración (min)', 'Tiempo Espera (min)', 'Resultado', 'Productos']];
+            const data = todasLasVisitas.map(visita => {
+                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                return [
+                    visita.fecha,
+                    cliente ? cliente.nombre : 'N/A',
+                    visita.duracion,
+                    visita.tiempoEspera,
+                    visita.resultado,
+                    visita.productos
+                ];
+            });
+            
+            doc.autoTable({
+                head: headers,
+                body: data,
+                startY: 30,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [44, 62, 80],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                margin: { top: 30 }
+            });
+            
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+            }
+            
+            doc.save('visitas_kaizen.pdf');
+        }
+
+        function exportVisitasExcel() {
+            // Preparar datos
+            const data = todasLasVisitas.map(visita => {
+                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                return {
+                    'Fecha': visita.fecha,
+                    'Cliente': cliente ? cliente.nombre : 'N/A',
+                    'Hora Inicio': visita.horaInicio,
+                    'Hora Fin': visita.horaFin,
+                    'Duración (min)': visita.duracion,
+                    'Tiempo Espera (min)': visita.tiempoEspera,
+                    'Resultado': visita.resultado,
+                    'Productos': visita.productos,
+                    'Observaciones': visita.observaciones
+                };
+            });
+            
+            // Crear libro de trabajo
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            
+            // Añadir hoja al libro
+            XLSX.utils.book_append_sheet(wb, ws, 'Visitas');
+            
+            // Guardar archivo
+            XLSX.writeFile(wb, 'visitas_kaizen.xlsx');
+        }
+
+        function exportCompletoPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Página 1: Clientes
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, null, null, 'center');
+            
+            doc.setFontSize(14);
+            doc.text('LISTA DE CLIENTES', 105, 25, null, null, 'center');
+            
+            // Fecha
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 32, null, null, 'center');
+            
+            // Tabla de clientes
+            const clientesHeaders = [['Nombre', 'Teléfono', 'Dirección', 'Municipio', 'Región', 'Potencial']];
+            const clientesData = todosClientes.map(cliente => [
+                cliente.nombre,
+                cliente.telefono,
+                cliente.direccion,
+                cliente.municipio,
+                cliente.region,
+                cliente.potencia
+            ]);
+            
+            doc.autoTable({
+                head: clientesHeaders,
+                body: clientesData,
+                startY: 40,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [44, 62, 80],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                }
+            });
+            
+            // Página 2: Visitas
+            doc.addPage();
+            
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, null, null, 'center');
+            
+            doc.setFontSize(14);
+            doc.text('HISTORIAL DE VISITAS', 105, 25, null, null, 'center');
+            
+            // Tabla de visitas
+            const visitasHeaders = [['Fecha', 'Cliente', 'Duración (min)', 'Resultado', 'Productos']];
+            const visitasData = todasLasVisitas.map(visita => {
+                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                return [
+                    visita.fecha,
+                    cliente ? cliente.nombre : 'N/A',
+                    visita.duracion,
+                    visita.resultado,
+                    visita.productos
+                ];
+            });
+            
+            doc.autoTable({
+                head: visitasHeaders,
+                body: visitasData,
+                startY: 35,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [44, 62, 80],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                }
+            });
+            
+            // Pie de página para todas las páginas
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+            }
+            
+            doc.save('reporte_completo_kaizen.pdf');
+        }
+
+        function exportCompletoExcel() {
+            // Crear libro de trabajo
+            const wb = XLSX.utils.book_new();
+            
+            // Hoja 1: Clientes
+            const clientesData = todosClientes.map(cliente => ({
+                'Nombre': cliente.nombre,
+                'Teléfono': cliente.telefono,
+                'Dirección': cliente.direccion,
+                'Municipio': cliente.municipio,
+                'Región': cliente.region,
+                'Potencial': cliente.potencia,
+                'Observaciones': cliente.observaciones
+            }));
+            
+            const clientesWs = XLSX.utils.json_to_sheet(clientesData);
+            XLSX.utils.book_append_sheet(wb, clientesWs, 'Clientes');
+            
+            // Hoja 2: Visitas
+            const visitasData = todasLasVisitas.map(visita => {
+                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                return {
+                    'Fecha': visita.fecha,
+                    'Cliente': cliente ? cliente.nombre : 'N/A',
+                    'Hora Inicio': visita.horaInicio,
+                    'Hora Fin': visita.horaFin,
+                    'Duración (min)': visita.duracion,
+                    'Tiempo Espera (min)': visita.tiempoEspera,
+                    'Resultado': visita.resultado,
+                    'Productos': visita.productos,
+                    'Observaciones': visita.observaciones
+                };
+            });
+            
+            const visitasWs = XLSX.utils.json_to_sheet(visitasData);
+            XLSX.utils.book_append_sheet(wb, visitasWs, 'Visitas');
+            
+            // Hoja 3: Resumen
+            const resumenData = [
+                {'Métrica': 'Total Clientes', 'Valor': todosClientes.length},
+                {'Métrica': 'Clientes Alta Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Alta').length},
+                {'Métrica': 'Clientes Media Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Media').length},
+                {'Métrica': 'Clientes Baja Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Baja').length},
+                {'Métrica': 'Total Visitas', 'Valor': todasLasVisitas.length},
+                {'Métrica': 'Visitas con Venta', 'Valor': todasLasVisitas.filter(v => v.resultado === 'Venta').length},
+                {'Métrica': 'Región con Más Clientes', 'Valor': 'Montaña Alta'},
+                {'Métrica': 'Producto Más Vendido', 'Valor': 'Kaizezol'}
+            ];
+            
+            const resumenWs = XLSX.utils.json_to_sheet(resumenData);
+            XLSX.utils.book_append_sheet(wb, resumenWs, 'Resumen');
+            
+            // Guardar archivo
+            XLSX.writeFile(wb, 'reporte_completo_kaizen.xlsx');
+        }
+
+        // Inicializar la aplicación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarAplicacion();
+        });
+
+        function inicializarAplicacion() {
+            // Inicializar gráficos
+            inicializarGraficos();
+            
+            // Cargar datos en las tablas
+            cargarTablaClientes();
+            cargarPlanVisitas();
+            cargarHistorialVisitas();
+            cargarClientesAltaPotencia();
+            cargarProximasVisitas();
+            
+            // Configurar event listeners
+            configurarEventListeners();
+        }
+
+        function inicializarGraficos() {
+            // Gráfico de actividad
+            const ctxActivity = document.getElementById('activityChart').getContext('2d');
+            new Chart(ctxActivity, {
+                type: 'line',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Visitas Realizadas',
+                        data: [45, 52, 48, 55, 58, 62, 65, 63, 60, 58, 64, 68],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: 'Ventas Realizadas',
+                        data: [28, 32, 30, 35, 38, 40, 42, 45, 43, 40, 44, 48],
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de distribución por región
+            const ctxRegion = document.getElementById('regionChart').getContext('2d');
+            new Chart(ctxRegion, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Montaña Baja', 'Montaña Alta', 'Huehuetenango', 'Aledaños Xela'],
+                    datasets: [{
+                        data: [10, 10, 10, 10],
+                        backgroundColor: [
+                            '#3498db',
+                            '#2ecc71',
+                            '#9b59b6',
+                            '#e74c3c'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de potencial
+            const ctxPotential = document.getElementById('potentialChart').getContext('2d');
+            new Chart(ctxPotential, {
+                type: 'bar',
+                data: {
+                    labels: ['Alta', 'Media', 'Baja'],
+                    datasets: [{
+                        label: 'Clientes por Potencial',
+                        data: [12, 14, 14],
+                        backgroundColor: [
+                            'rgba(39, 174, 96, 0.7)',
+                            'rgba(243, 156, 18, 0.7)',
+                            'rgba(231, 76, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            '#27ae60',
+                            '#f39c12',
+                            '#e74c3c'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de análisis de potencial
+            const ctxPotentialAnalysis = document.getElementById('potentialAnalysisChart').getContext('2d');
+            new Chart(ctxPotentialAnalysis, {
+                type: 'radar',
+                data: {
+                    labels: ['Frecuencia de Compra', 'Volumen de Compra', 'Puntualidad en Pagos', 'Interés en Nuevos Productos', 'Recomendaciones'],
+                    datasets: [{
+                        label: 'Alta Potencia',
+                        data: [90, 85, 95, 80, 75],
+                        backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                        borderColor: '#27ae60',
+                        pointBackgroundColor: '#27ae60'
+                    }, {
+                        label: 'Media Potencia',
+                        data: [65, 60, 70, 50, 45],
+                        backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                        borderColor: '#f39c12',
+                        pointBackgroundColor: '#f39c12'
+                    }, {
+                        label: 'Baja Potencia',
+                        data: [30, 25, 40, 20, 15],
+                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        borderColor: '#e74c3c',
+                        pointBackgroundColor: '#e74c3c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de municipios
+            const ctxMunicipio = document.getElementById('municipioChart').getContext('2d');
+            new Chart(ctxMunicipio, {
+                type: 'horizontalBar',
+                data: {
+                    labels: ['Huehuetenango', 'Aguacatan', 'Chiantla', 'La Democracia', 'San Pedro Necta', 'Colotenango', 'San Antonio Huista', 'Camoja Grande'],
+                    datasets: [{
+                        label: 'Clientes por Municipio',
+                        data: [10, 7, 5, 5, 4, 4, 3, 2],
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: '#3498db',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de eficiencia por región
+            const ctxEfficiency = document.getElementById('efficiencyChart').getContext('2d');
+            new Chart(ctxEfficiency, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Montaña Baja', 'Montaña Alta', 'Huehuetenango', 'Aledaños Xela'],
+                    datasets: [{
+                        data: [75, 85, 70, 60],
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(155, 89, 182, 0.7)',
+                            'rgba(231, 76, 60, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarTablaClientes() {
+            const tbody = document.getElementById('clientTable');
+            tbody.innerHTML = '';
+            
+            todosClientes.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.className = 'client-row';
+                tr.setAttribute('data-id', cliente.id);
+                
+                // Determinar clase de badge según potencia
+                let badgeClass = 'badge-potencia-baja';
+                if (cliente.potencia === 'Alta') badgeClass = 'badge-potencia-alta';
+                else if (cliente.potencia === 'Media') badgeClass = 'badge-potencia-media';
+                
+                // Obtener última visita
+                const visitasCliente = todasLasVisitas.filter(v => v.idCliente === cliente.id);
+                visitasCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                const ultimaVisita = visitasCliente.length > 0 ? visitasCliente[0].fecha : 'Nunca';
+                
+                tr.innerHTML = `
+                    <td>${cliente.nombre}</td>
+                    <td>${cliente.telefono}</td>
+                    <td>${cliente.direccion}</td>
+                    <td>${cliente.municipio}</td>
+                    <td><span class="badge region-badge bg-secondary">${cliente.region}</span></td>
+                    <td><span class="badge ${badgeClass}">${cliente.potencia}</span></td>
+                    <td>${ultimaVisita}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary view-client" data-id="${cliente.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            // Actualizar contador
+            document.getElementById('clientCount').textContent = `${todosClientes.length} clientes`;
+            
+            // Configurar event listeners para los botones de ver cliente
+            document.querySelectorAll('.view-client').forEach(button => {
+                button.addEventListener('click', function() {
+                    const clientId = this.getAttribute('data-id');
+                    mostrarDetallesCliente(clientId);
+                });
+            });
+        }
+
+        function cargarPlanVisitas() {
+            // Para simplificar, seleccionamos 6 clientes al azar para el plan de hoy
+            const clientesHoy = [];
+            const indicesUsados = [];
+            
+            while (clientesHoy.length < 6 && indicesUsados.length < todosClientes.length) {
+                const indice = Math.floor(Math.random() * todosClientes.length);
+                if (!indicesUsados.includes(indice)) {
+                    clientesHoy.push(todosClientes[indice]);
+                    indicesUsados.push(indice);
+                }
+            }
+            
+            // Ordenar por municipio para simular una ruta lógica
+            clientesHoy.sort((a, b) => a.municipio.localeCompare(b.municipio));
+            
+            const timeline = document.getElementById('visitTimeline');
+            timeline.innerHTML = '';
+            
+            let horaActual = '08:30';
+            
+            clientesHoy.forEach((cliente, index) => {
+                const duracion = Math.floor(Math.random() * 31) + 15; // 15-45 minutos
+                const tiempoViaje = index === 0 ? 0 : Math.floor(Math.random() * 20) + 10; // 10-30 minutos
+                
+                // Calcular hora de fin
+                const [hora, minuto] = horaActual.split(':').map(Number);
+                let totalMinutos = hora * 60 + minuto + duracion + tiempoViaje;
+                const horaFinH = Math.floor(totalMinutos / 60);
+                const horaFinM = totalMinutos % 60;
+                const horaFin = `${horaFinH.toString().padStart(2, '0')}:${horaFinM.toString().padStart(2, '0')}`;
+                
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.innerHTML = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="card-title">${cliente.nombre}</h6>
+                                <span class="badge ${cliente.potencia === 'Alta' ? 'bg-success' : cliente.potencia === 'Media' ? 'bg-warning' : 'bg-danger'}">${cliente.potencia}</span>
+                            </div>
+                            <p class="card-text mb-1"><small class="text-muted">${cliente.direccion}, ${cliente.municipio}</small></p>
+                            <p class="card-text mb-1"><strong>Horario:</strong> ${horaActual} - ${horaFin}</p>
+                            <p class="card-text mb-1"><strong>Duración:</strong> ${duracion} min</p>
+                            <p class="card-text"><strong>Tiempo de viaje:</strong> ${index === 0 ? 'Inicio del día' : tiempoViaje + ' min'}</p>
+                            <button class="btn btn-sm btn-outline-primary">Ver detalles</button>
+                        </div>
+                    </div>
+                `;
+                
+                timeline.appendChild(timelineItem);
+                
+                // Actualizar hora actual para el siguiente cliente
+                horaActual = horaFin;
+            });
+            
+            // Actualizar resumen del día
+            document.getElementById('totalClientsDay').textContent = clientesHoy.length;
+            document.getElementById('totalTimeDay').textContent = '4h 30m'; // Valor fijo por simplicidad
+            
+            // Cargar clientes para mañana
+            const tomorrowList = document.getElementById('tomorrowVisits');
+            tomorrowList.innerHTML = '';
+            
+            // Seleccionar 4 clientes para mañana
+            const clientesManana = [];
+            const indicesManana = [];
+            
+            while (clientesManana.length < 4 && indicesManana.length < todosClientes.length) {
+                const indice = Math.floor(Math.random() * todosClientes.length);
+                if (!indicesManana.includes(indice) && !indicesUsados.includes(indice)) {
+                    clientesManana.push(todosClientes[indice]);
+                    indicesManana.push(indice);
+                }
+            }
+            
+            clientesManana.forEach(cliente => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    ${cliente.nombre}
+                    <span class="badge ${cliente.potencia === 'Alta' ? 'bg-success' : cliente.potencia === 'Media' ? 'bg-warning' : 'bg-danger'} rounded-pill">${cliente.potencia}</span>
+                `;
+                tomorrowList.appendChild(li);
+            });
+        }
+
+        function cargarHistorialVisitas() {
+            const tbody = document.getElementById('historyTable');
+            tbody.innerHTML = '';
+            
+            // Mostrar solo las primeras 10 visitas por simplicidad
+            const visitasMostrar = todasLasVisitas.slice(0, 10);
+            
+            visitasMostrar.forEach(visita => {
+                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                if (!cliente) return;
+                
+                const tr = document.createElement('tr');
+                tr.className = 'visita-row';
+                
+                // Determinar clase de badge según resultado
+                let badgeClass = 'bg-secondary';
+                if (visita.resultado === 'Venta') badgeClass = 'bg-success';
+                else if (visita.resultado === 'Seguimiento') badgeClass = 'bg-primary';
+                else if (visita.resultado === 'No atendido') badgeClass = 'bg-warning';
+                else if (visita.resultado === 'Cancelado') badgeClass = 'bg-danger';
+                
+                tr.innerHTML = `
+                    <td>${visita.fecha}</td>
+                    <td>${cliente.nombre}</td>
+                    <td>${visita.duracion} min</td>
+                    <td><span class="badge ${badgeClass}">${visita.resultado}</span></td>
+                    <td>${visita.productos}</td>
+                    <td>${visita.observaciones}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            // Actualizar contador
+            document.getElementById('historyCount').textContent = `${todasLasVisitas.length} visitas`;
+            
+            // Llenar select de clientes para filtro
+            const selectClient = document.getElementById('historialClient');
+            selectClient.innerHTML = '<option value="">Todos los clientes</option>';
+            
+            todosClientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = cliente.nombre;
+                selectClient.appendChild(option);
+            });
+        }
+
+        function cargarClientesAltaPotencia() {
+            const highPotentialList = document.getElementById('highPotentialClients');
+            highPotentialList.innerHTML = '';
+            
+            const clientesAltaPotencia = todosClientes.filter(c => c.potencia === 'Alta');
+            
+            // Mostrar solo los primeros 8
+            clientesAltaPotencia.slice(0, 8).forEach(cliente => {
+                const a = document.createElement('a');
+                a.href = '#';
+                a.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                a.innerHTML = `
+                    <div>
+                        <h6 class="mb-1">${cliente.nombre}</h6>
+                        <small class="text-muted">${cliente.municipio}</small>
+                    </div>
+                    <span class="badge bg-success rounded-pill">Alta</span>
+                `;
+                
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mostrarDetallesCliente(cliente.id);
+                });
+                
+                highPotentialList.appendChild(a);
+            });
+        }
+
+        function cargarProximasVisitas() {
+            const tbody = document.getElementById('upcomingVisits');
+            tbody.innerHTML = '';
+            
+            // Generar algunas visitas próximas
+            const proximasVisitas = [];
+            const hoy = new Date();
+            
+            for (let i = 1; i <= 5; i++) {
+                const fecha = new Date(hoy);
+                fecha.setDate(hoy.getDate() + i);
+                
+                const clienteIndex = Math.floor(Math.random() * todosClientes.length);
+                const cliente = todosClientes[clienteIndex];
+                
+                proximasVisitas.push({
+                    fecha: fecha.toISOString().split('T')[0],
+                    cliente: cliente.nombre,
+                    hora: generarHoraAleatoria(),
+                    estado: i === 1 ? 'Confirmada' : 'Pendiente'
+                });
+            }
+            
+            proximasVisitas.forEach(visita => {
+                const tr = document.createElement('tr');
+                
+                // Determinar clase de badge según estado
+                let badgeClass = 'bg-warning';
+                if (visita.estado === 'Confirmada') badgeClass = 'bg-success';
+                
+                tr.innerHTML = `
+                    <td>${visita.cliente}</td>
+                    <td>${visita.fecha}</td>
+                    <td>${visita.hora}</td>
+                    <td><span class="badge ${badgeClass}">${visita.estado}</span></td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function mostrarDetallesCliente(id) {
+            const cliente = todosClientes.find(c => c.id === parseInt(id));
+            if (!cliente) return;
+            
+            // Obtener visitas del cliente
+            const visitasCliente = todasLasVisitas.filter(v => v.idCliente === parseInt(id));
+            visitasCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            // Llenar modal con información del cliente
+            document.getElementById('clientModalTitle').textContent = `Detalles: ${cliente.nombre}`;
+            document.getElementById('modalClientName').textContent = cliente.nombre;
+            document.getElementById('modalClientPhone').textContent = cliente.telefono;
+            document.getElementById('modalClientAddress').textContent = cliente.direccion;
+            document.getElementById('modalClientMunicipio').textContent = cliente.municipio;
+            document.getElementById('modalClientRegion').textContent = cliente.region;
+            document.getElementById('modalClientPotential').innerHTML = `<span class="badge ${cliente.potencia === 'Alta' ? 'bg-success' : cliente.potencia === 'Media' ? 'bg-warning' : 'bg-danger'}">${cliente.potencia}</span>`;
+            document.getElementById('modalClientTotalVisits').textContent = visitasCliente.length;
+            document.getElementById('modalClientLastVisit').textContent = visitasCliente.length > 0 ? visitasCliente[0].fecha : 'Nunca';
+            document.getElementById('modalClientProducts').textContent = 'Kaizezol, Dastyl C, Aspek';
+            document.getElementById('modalClientStatus').textContent = cliente.potencia === 'Baja' ? 'Necesita seguimiento' : 'Activo';
+            
+            // Llenar tabla de visitas
+            const tbody = document.getElementById('modalClientVisits');
+            tbody.innerHTML = '';
+            
+            // Mostrar solo las últimas 5 visitas
+            const ultimasVisitas = visitasCliente.slice(0, 5);
+            
+            ultimasVisitas.forEach(visita => {
+                const tr = document.createElement('tr');
+                
+                // Determinar clase de badge según resultado
+                let badgeClass = 'bg-secondary';
+                if (visita.resultado === 'Venta') badgeClass = 'bg-success';
+                else if (visita.resultado === 'Seguimiento') badgeClass = 'bg-primary';
+                else if (visita.resultado === 'No atendido') badgeClass = 'bg-warning';
+                else if (visita.resultado === 'Cancelado') badgeClass = 'bg-danger';
+                
+                tr.innerHTML = `
+                    <td>${visita.fecha}</td>
+                    <td>${visita.duracion} min</td>
+                    <td><span class="badge ${badgeClass}">${visita.resultado}</span></td>
+                    <td>${visita.productos}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('clientModal'));
+            modal.show();
+        }
+
+        function configurarEventListeners() {
+            // Filtros de clientes
+            document.getElementById('regionFilter').addEventListener('change', filtrarClientes);
+            document.getElementById('potentialFilter').addEventListener('change', filtrarClientes);
+            document.getElementById('municipioFilter').addEventListener('input', filtrarClientes);
+            document.getElementById('searchClient').addEventListener('input', filtrarClientes);
+            
+            // Navegación de fechas en plan de visitas
+            document.getElementById('prevDay').addEventListener('click', function() {
+                alert('Funcionalidad: Ir al día anterior');
+            });
+            
+            document.getElementById('nextDay').addEventListener('click', function() {
+                alert('Funcionalidad: Ir al día siguiente');
+            });
+            
+            // Filtro de historial
+            document.getElementById('filterHistory').addEventListener('click', function() {
+                alert('Funcionalidad: Filtrar historial de visitas');
+            });
+            
+            // Exportación
+            document.getElementById('exportPdfClientesTop').addEventListener('click', exportClientesPDF);
+            document.getElementById('exportPdfClientes').addEventListener('click', exportClientesPDF);
+            document.getElementById('exportExcelClientesTop').addEventListener('click', exportClientesExcel);
+            document.getElementById('exportExcelClientes').addEventListener('click', exportClientesExcel);
+            document.getElementById('exportPdfVisitasTop').addEventListener('click', exportVisitasPDF);
+            document.getElementById('exportPdfVisitas').addEventListener('click', exportVisitasPDF);
+            document.getElementById('exportExcelVisitasTop').addEventListener('click', exportVisitasExcel);
+            document.getElementById('exportExcelVisitas').addEventListener('click', exportVisitasExcel);
+            document.getElementById('exportPdfCompleto').addEventListener('click', exportCompletoPDF);
+            document.getElementById('exportExcelCompleto').addEventListener('click', exportCompletoExcel);
+        }
+
+        function filtrarClientes() {
+            const region = document.getElementById('regionFilter').value;
+            const potencial = document.getElementById('potentialFilter').value;
+            const municipio = document.getElementById('municipioFilter').value.toLowerCase();
+            const search = document.getElementById('searchClient').value.toLowerCase();
+            
+            const filas = document.querySelectorAll('#clientTable tr');
+            let visibleCount = 0;
+            
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('td');
+                if (celdas.length === 0) return;
+                
+                const nombre = celdas[0].textContent.toLowerCase();
+                const dirMunicipio = celdas[3].textContent.toLowerCase();
+                const textRegion = celdas[4].textContent;
+                const textPotencial = celdas[5].textContent;
+                
+                let visible = true;
+                
+                if (region && !textRegion.includes(region)) visible = false;
+                if (potencial && textPotencial !== potencial) visible = false;
+                if (municipio && !dirMunicipio.includes(municipio)) visible = false;
+                if (search && !nombre.includes(search)) visible = false;
+                
+                fila.style.display = visible ? '' : 'none';
+                if (visible) visibleCount++;
+            });
+            
+            document.getElementById('clientCount').textContent = `${visibleCount} clientes`;
+        }
+    </script>
+</body>
+</html>
