@@ -165,6 +165,11 @@
             margin-bottom: 20px;
         }
         
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
         @media (max-width: 768px) {
             .sidebar {
                 min-height: auto;
@@ -186,16 +191,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Dashboard</a>
+                        <a class="nav-link active" href="#" data-tab="dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Clientes</a>
+                        <a class="nav-link" href="#" data-tab="clientes">Clientes</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Visitas</a>
+                        <a class="nav-link" href="#" data-tab="visitas">Visitas</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Reportes</a>
+                        <a class="nav-link" href="#" data-tab="potencial">Potencial</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-tab="distribucion">Distribución</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-tab="historial">Historial</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -224,32 +235,32 @@
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#">
+                            <a class="nav-link active" href="#" data-tab="dashboard">
                                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#clientes">
+                            <a class="nav-link" href="#" data-tab="clientes">
                                 <i class="fas fa-users me-2"></i> Todos los Clientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#visitas">
+                            <a class="nav-link" href="#" data-tab="visitas">
                                 <i class="fas fa-calendar-check me-2"></i> Plan de Visitas
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#potencial">
+                            <a class="nav-link" href="#" data-tab="potencial">
                                 <i class="fas fa-chart-line me-2"></i> Potencial de Clientes
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#distribucion">
+                            <a class="nav-link" href="#" data-tab="distribucion">
                                 <i class="fas fa-map-marked-alt me-2"></i> Distribución por Región
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#historial">
+                            <a class="nav-link" href="#" data-tab="historial">
                                 <i class="fas fa-history me-2"></i> Historial de Visitas
                             </a>
                         </li>
@@ -551,7 +562,7 @@
                                             <span>Potencial de venta:</span>
                                             <strong id="salePotential">Alto</strong>
                                         </div>
-                                        <button class="btn btn-primary w-100 mt-3">Generar Ruta Optimizada</button>
+                                        <button class="btn btn-primary w-100 mt-3" id="generateRoute">Generar Ruta Optimizada</button>
                                     </div>
                                 </div>
                                 
@@ -749,6 +760,7 @@
                                             </select>
                                         </div>
                                         <button class="btn btn-primary w-100" id="filterHistory">Filtrar</button>
+                                        <button class="btn btn-outline-secondary w-100 mt-2" id="clearHistory">Limpiar Filtros</button>
                                     </div>
                                 </div>
                             </div>
@@ -871,7 +883,7 @@
             {id: 25, nombre: "Alejandro Sanchez", telefono: "5808-1048", direccion: "carretera de salida hacia huehuetenango, Cuilco", municipio: "Cuilco", region: "Aledaños Xela", potencia: "Alta", observaciones: "Compro Aspek"}
         ];
 
-        // Generar visitas para cada cliente (5 visitas por cliente)
+        // Generar visitas para cada cliente (5 visitas por cliente) y ordenarlas por fecha
         const visitas = [];
         const productos = ["Kaizezol", "Dastyl C", "Aspek", "Celecoxib", "Pantoprazol", "Arginina"];
         const resultados = ["Venta", "Seguimiento", "No atendido", "Cancelado"];
@@ -953,6 +965,9 @@
                 });
             }
         });
+
+        // ORDENAR VISITAS POR FECHA (más recientes primero)
+        visitas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
         // Funciones de exportación
         function exportClientesPDF() {
@@ -1046,7 +1061,7 @@
             doc.setTextColor(100, 100, 100);
             doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, { align: 'center' });
             
-            // Tabla de visitas
+            // Tabla de visitas (ordenadas por fecha)
             const headers = [['Fecha', 'Cliente', 'Duración (min)', 'Tiempo Espera (min)', 'Resultado', 'Productos']];
             const data = visitas.map(visita => {
                 const cliente = clientes.find(c => c.id === visita.idCliente);
@@ -1090,7 +1105,7 @@
         }
 
         function exportVisitasExcel() {
-            // Preparar datos
+            // Preparar datos (ordenados por fecha)
             const data = visitas.map(visita => {
                 const cliente = clientes.find(c => c.id === visita.idCliente);
                 return {
@@ -1170,7 +1185,7 @@
             doc.setFontSize(14);
             doc.text('HISTORIAL DE VISITAS', 105, 25, { align: 'center' });
             
-            // Tabla de visitas
+            // Tabla de visitas (ordenadas por fecha)
             const visitasHeaders = [['Fecha', 'Cliente', 'Duración (min)', 'Resultado', 'Productos']];
             const visitasData = visitas.map(visita => {
                 const cliente = clientes.find(c => c.id === visita.idCliente);
@@ -1229,7 +1244,7 @@
             const clientesWs = XLSX.utils.json_to_sheet(clientesData);
             XLSX.utils.book_append_sheet(wb, clientesWs, 'Clientes');
             
-            // Hoja 2: Visitas
+            // Hoja 2: Visitas (ordenadas por fecha)
             const visitasData = visitas.map(visita => {
                 const cliente = clientes.find(c => c.id === visita.idCliente);
                 return {
@@ -1633,10 +1648,8 @@
             const tbody = document.getElementById('historyTable');
             tbody.innerHTML = '';
             
-            // Mostrar solo las primeras 10 visitas por simplicidad
-            const visitasMostrar = visitas.slice(0, 10);
-            
-            visitasMostrar.forEach(visita => {
+            // Mostrar todas las visitas ordenadas por fecha (más recientes primero)
+            visitas.forEach(visita => {
                 const cliente = clientes.find(c => c.id === visita.idCliente);
                 if (!cliente) return;
                 
@@ -1855,8 +1868,12 @@
             });
             
             // Filtro de historial
-            document.getElementById('filterHistory').addEventListener('click', function() {
-                alert('Funcionalidad: Filtrar historial de visitas');
+            document.getElementById('filterHistory').addEventListener('click', filtrarHistorial);
+            document.getElementById('clearHistory').addEventListener('click', limpiarFiltrosHistorial);
+            
+            // Botón de generar ruta
+            document.getElementById('generateRoute').addEventListener('click', function() {
+                alert('Generando ruta optimizada...');
             });
             
             // Exportación
@@ -1864,6 +1881,32 @@
                 button.addEventListener('click', function() {
                     const type = this.getAttribute('data-type');
                     manejarExportacion(type);
+                });
+            });
+            
+            // Navegación por pestañas desde el menú superior
+            document.querySelectorAll('.navbar-nav .nav-link[data-tab]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tab = this.getAttribute('data-tab');
+                    const tabElement = document.getElementById(`${tab}-tab`);
+                    if (tabElement) {
+                        const tabInstance = new bootstrap.Tab(tabElement);
+                        tabInstance.show();
+                    }
+                });
+            });
+            
+            // Navegación por pestañas desde el sidebar
+            document.querySelectorAll('.sidebar .nav-link[data-tab]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tab = this.getAttribute('data-tab');
+                    const tabElement = document.getElementById(`${tab}-tab`);
+                    if (tabElement) {
+                        const tabInstance = new bootstrap.Tab(tabElement);
+                        tabInstance.show();
+                    }
                 });
             });
         }
@@ -1921,6 +1964,57 @@
             });
             
             document.getElementById('clientCount').textContent = `${visibleCount} clientes`;
+        }
+
+        function filtrarHistorial() {
+            const clienteId = document.getElementById('historialClient').value;
+            const fechaDesde = document.getElementById('historialDateFrom').value;
+            const fechaHasta = document.getElementById('historialDateTo').value;
+            const resultado = document.getElementById('historialResult').value;
+            
+            const filas = document.querySelectorAll('#historyTable tr');
+            let visibleCount = 0;
+            
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('td');
+                if (celdas.length === 0) return;
+                
+                const fecha = celdas[0].textContent;
+                const nombreCliente = celdas[1].textContent;
+                const textResultado = celdas[3].textContent;
+                
+                let visible = true;
+                
+                // Filtrar por cliente
+                if (clienteId) {
+                    const cliente = clientes.find(c => c.id == clienteId);
+                    if (cliente && nombreCliente !== cliente.nombre) {
+                        visible = false;
+                    }
+                }
+                
+                // Filtrar por fecha
+                if (fechaDesde && fecha < fechaDesde) visible = false;
+                if (fechaHasta && fecha > fechaHasta) visible = false;
+                
+                // Filtrar por resultado
+                if (resultado && textResultado !== resultado) visible = false;
+                
+                fila.style.display = visible ? '' : 'none';
+                if (visible) visibleCount++;
+            });
+            
+            document.getElementById('historyCount').textContent = `${visibleCount} visitas`;
+        }
+
+        function limpiarFiltrosHistorial() {
+            document.getElementById('historialClient').value = '';
+            document.getElementById('historialDateFrom').value = '';
+            document.getElementById('historialDateTo').value = '';
+            document.getElementById('historialResult').value = '';
+            
+            // Recargar el historial sin filtros
+            cargarHistorialVisitas();
         }
     </script>
 </body>
