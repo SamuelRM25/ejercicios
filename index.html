@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -176,7 +177,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE5IDNINUMzLjg5IDMgMyAzLjkgMyA1VjE5QzMgMjAuMSAzLjkgMjEgNSAyMUgxOUMyMC4xIDIxIDIxIDIwLjEgMjEgMTlWNUMyMSAzLjkgMjAuMSAzIDE5IDNaTTUgNUgxOUwxOSAxOUg1VjVaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNyA3SDE3VjEwSDdWN1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik03IDEySDE3VjE1SDdWMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNNyAxN0gxM1YyMEg3VjE3WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==" alt="Logo" width="30" height="30" class="d-inline-block align-text-top me-2">
+                <i class="fas fa-users me-2"></i>
                 KAIZEN - Sistema de Clientes
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -201,14 +202,14 @@
                             Exportar
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" id="exportPdfClientes">Clientes (PDF)</a></li>
-                            <li><a class="dropdown-item" href="#" id="exportExcelClientes">Clientes (Excel)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="clientes-pdf">Clientes (PDF)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="clientes-excel">Clientes (Excel)</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" id="exportPdfVisitas">Visitas (PDF)</a></li>
-                            <li><a class="dropdown-item" href="#" id="exportExcelVisitas">Visitas (Excel)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="visitas-pdf">Visitas (PDF)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="visitas-excel">Visitas (Excel)</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" id="exportPdfCompleto">Reporte Completo (PDF)</a></li>
-                            <li><a class="dropdown-item" href="#" id="exportExcelCompleto">Reporte Completo (Excel)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="completo-pdf">Reporte Completo (PDF)</a></li>
+                            <li><a class="dropdown-item export-action" href="#" data-type="completo-excel">Reporte Completo (Excel)</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -261,16 +262,16 @@
                 <!-- Export Buttons -->
                 <div class="export-buttons">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary" id="exportPdfClientesTop">
+                        <button type="button" class="btn btn-outline-primary export-action" data-type="clientes-pdf">
                             <i class="fas fa-file-pdf me-2"></i>Exportar Clientes (PDF)
                         </button>
-                        <button type="button" class="btn btn-outline-success" id="exportExcelClientesTop">
+                        <button type="button" class="btn btn-outline-success export-action" data-type="clientes-excel">
                             <i class="fas fa-file-excel me-2"></i>Exportar Clientes (Excel)
                         </button>
-                        <button type="button" class="btn btn-outline-primary" id="exportPdfVisitasTop">
+                        <button type="button" class="btn btn-outline-primary export-action" data-type="visitas-pdf">
                             <i class="fas fa-file-pdf me-2"></i>Exportar Visitas (PDF)
                         </button>
-                        <button type="button" class="btn btn-outline-success" id="exportExcelVisitasTop">
+                        <button type="button" class="btn btn-outline-success export-action" data-type="visitas-excel">
                             <i class="fas fa-file-excel me-2"></i>Exportar Visitas (Excel)
                         </button>
                     </div>
@@ -285,7 +286,7 @@
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                             Total Clientes</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">128</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalClientes">0</div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -301,7 +302,7 @@
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                             Alta Potencia</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">28</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalAltaPotencia">0</div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fas fa-star fa-2x text-gray-300"></i>
@@ -317,7 +318,7 @@
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                             Visitas Este Mes</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">64</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalVisitas">0</div>
                                     </div>
                                     <div class="col-auto">
                                         <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -478,7 +479,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Lista de Clientes</h5>
-                                <span class="badge bg-primary" id="clientCount">128 clientes</span>
+                                <span class="badge bg-primary" id="clientCount">0 clientes</span>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -500,11 +501,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <nav aria-label="Client pagination">
-                                    <ul class="pagination justify-content-center" id="clientPagination">
-                                        <!-- La paginación se generará aquí -->
-                                    </ul>
-                                </nav>
                             </div>
                         </div>
                     </div>
@@ -621,21 +617,21 @@
                                                 <tbody>
                                                     <tr>
                                                         <td><span class="badge bg-success">Alta Potencia</span></td>
-                                                        <td>28</td>
+                                                        <td id="segmentoAlta">0</td>
                                                         <td>Q 1,850</td>
                                                         <td>2 veces/mes</td>
                                                         <td>Mantener relación, ofrecer nuevos productos</td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="badge bg-warning">Media Potencia</span></td>
-                                                        <td>45</td>
+                                                        <td id="segmentoMedia">0</td>
                                                         <td>Q 850</td>
                                                         <td>1 vez/mes</td>
                                                         <td>Incrementar frecuencia, educar sobre productos</td>
                                                     </tr>
                                                     <tr>
                                                         <td><span class="badge bg-danger">Baja Potencia</span></td>
-                                                        <td>55</td>
+                                                        <td id="segmentoBaja">0</td>
                                                         <td>Q 320</td>
                                                         <td>1 vez/2 meses</td>
                                                         <td>Evaluar rentabilidad, considerar descarte</td>
@@ -697,31 +693,8 @@
                                                         <th>Potencial Promedio</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Montaña Baja</td>
-                                                        <td>32</td>
-                                                        <td>25%</td>
-                                                        <td><span class="badge bg-warning">Media</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Montaña Alta</td>
-                                                        <td>42</td>
-                                                        <td>33%</td>
-                                                        <td><span class="badge bg-success">Alta</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Huehuetenango Cabecera</td>
-                                                        <td>39</td>
-                                                        <td>30%</td>
-                                                        <td><span class="badge bg-warning">Media</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Aledaños Xela</td>
-                                                        <td>15</td>
-                                                        <td>12%</td>
-                                                        <td><span class="badge bg-danger">Baja</span></td>
-                                                    </tr>
+                                                <tbody id="regionDistribution">
+                                                    <!-- La distribución por región se cargará aquí -->
                                                 </tbody>
                                             </table>
                                         </div>
@@ -783,7 +756,7 @@
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">Historial de Visitas</h5>
-                                        <span class="badge bg-primary" id="historyCount">640 visitas</span>
+                                        <span class="badge bg-primary" id="historyCount">0 visitas</span>
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
@@ -803,11 +776,6 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <nav aria-label="History pagination">
-                                            <ul class="pagination justify-content-center" id="historyPagination">
-                                                <!-- La paginación se generará aquí -->
-                                            </ul>
-                                        </nav>
                                     </div>
                                 </div>
                             </div>
@@ -873,13 +841,9 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
     <script>
-        // Reemplaza con tu propio kit de FontAwesome
-        document.head.innerHTML += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">';
-        
-        // Datos de clientes - Montaña Baja (solo primeros 10 para ejemplo)
-        const clientesMontanaBaja = [
+        // Datos de ejemplo
+        const clientes = [
             {id: 1, nombre: "Dr Leonel Pérez", telefono: "7773-8163", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Media", observaciones: "No estuvo toda la semana"},
             {id: 2, nombre: "Dra Yoselin", telefono: "7773-8033", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Baja", observaciones: "No se encontraba la Doctora, solamente deje listado y muestras"},
             {id: 3, nombre: "Dr Sergio Pais", telefono: "5524-8253", direccion: "La Democracia", municipio: "La Democracia", region: "Montaña Baja", potencia: "Media", observaciones: "Hay que seguir visitando"},
@@ -889,66 +853,27 @@
             {id: 7, nombre: "Dr Gerardo Hernández", telefono: "4087-9945", direccion: "San Pedro Necta", municipio: "San Pedro Necta", region: "Montaña Baja", potencia: "Alta", observaciones: "Cancelo su factura"},
             {id: 8, nombre: "Dr. Omar Villatoro", telefono: "5377-4073", direccion: "San Pedro Necta", municipio: "San Pedro Necta", region: "Montaña Baja", potencia: "Alta", observaciones: "Compro Medicamento"},
             {id: 9, nombre: "Farmacia Luna", telefono: "4548-8537", direccion: "San Antonio Huista", municipio: "San Antonio Huista", region: "Montaña Baja", potencia: "Alta", observaciones: "Compro Medicamento y Cancelo su factura"},
-            {id: 10, nombre: "Dr César Camposeco", telefono: "3025-6812", direccion: "Santa Ana Huista", municipio: "Santa Ana Huista", region: "Montaña Baja", potencia: "Alta", observaciones: "Cancelo su factura"}
-        ];
-
-        // Datos de clientes - Montaña Alta (solo primeros 10 para ejemplo)
-        const clientesMontanaAlta = [
+            {id: 10, nombre: "Dr César Camposeco", telefono: "3025-6812", direccion: "Santa Ana Huista", municipio: "Santa Ana Huista", region: "Montaña Baja", potencia: "Alta", observaciones: "Cancelo su factura"},
             {id: 11, nombre: "Farmacia Lili", telefono: "5725-3720", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "La descartaré para la siguiente visita"},
             {id: 12, nombre: "Farmacia Flor de mi Tierra", telefono: "3562-4922", direccion: "Aguacatan, una cuadra antes del semáforo", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "No está comprando, al parecer cerrará la farmacia"},
             {id: 13, nombre: "Farmacia Galicia", telefono: "5839-9583", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "Estaba cerrado"},
             {id: 14, nombre: "Dra Marta García", telefono: "5883-9940", direccion: "Aguacatan, debajo del Dr Keiner", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Media", observaciones: "Recibió visita, verá existencias y se comunicará conmigo"},
             {id: 15, nombre: "Dr Keiner Gómez", telefono: "4893-9499", direccion: "Aguacatan, arriba de la Dra Marta", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Alta", observaciones: "Interesado en Dastyl C"},
-            {id: 16, nombre: "Dr Luis Quiñónez", telefono: "5892-4849", direccion: "Aguacatan, en la calle principal", municipio: "Aguacatan", region: "Montaña Alta", potencia: "Baja", observaciones: "No estaba atendiendo"},
-            {id: 17, nombre: "Dr Jorge Luis", telefono: "4134-7898", direccion: "Chiantla, después de las clínicas de la cooperativa", municipio: "Chiantla", region: "Montaña Alta", potencia: "Baja", observaciones: "No se encontraba"},
-            {id: 18, nombre: "Farmacia Emanuel", telefono: "5874-3821", direccion: "Chiantla, frente al parque central", municipio: "Chiantla", region: "Montaña Alta", potencia: "Alta", observaciones: "Va a depositar su factura, o al menos un abono"},
-            {id: 19, nombre: "Farmacia Fresca Unción", telefono: "3524-3283", direccion: "Chiantla, frente a la plaza de bestias", municipio: "Chiantla", region: "Montaña Alta", potencia: "Baja", observaciones: "Estaba cerrado"},
-            {id: 20, nombre: "Farmacia de León", telefono: "3110-6110", direccion: "Chiantla, Aldea Agua Alegre", municipio: "Chiantla", region: "Montaña Alta", potencia: "Alta", observaciones: "Compro Aspek"}
-        ];
-
-        // Datos de clientes - Huehuetenango Cabecera (solo primeros 10 para ejemplo)
-        const clientesHuehuetenango = [
-            {id: 21, nombre: "Dr Pablo Elías", telefono: "4151-9004", direccion: "Zona 8, camino al semaforo", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Media", observaciones: "Aún en proceso de que tenga un espacio para comprar"},
-            {id: 22, nombre: "Dr Brayan Gómez", telefono: "5198-9469", direccion: "Zona 11, al lado de distribuidora la bendicion", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Aún tiene medicamento"},
-            {id: 23, nombre: "Dr Aarón", telefono: "5052-5292", direccion: "Zona 5, al lado del colegio palabra en acción", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Lo visité en Chiantla, pero tienen medicamento"},
-            {id: 24, nombre: "Dr Abdias Martínez", telefono: "7913-9462", direccion: "Zona 11, semáforo de vitatrac a la izquierda", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Creo que 3 visitas más y dejo de visitarlo"},
-            {id: 25, nombre: "Dr Julio Octavio", telefono: "3883 1442", direccion: "Zona 11, zentroplaza camino a intervida", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
-            {id: 26, nombre: "Dra Ingrid Roldán", telefono: "5371-6407", direccion: "Zona 11, plaza once", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
-            {id: 27, nombre: "Dra Janya", telefono: "3252-4696", direccion: "Zona 5, al lado del colegio palabra en acción", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Lo visité en Chiantla, pero tienen medicamento"},
-            {id: 28, nombre: "Farmacia Castillo Fuerte", telefono: "4552-6713", direccion: "Zona 12, camino a barberia los parceros", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Media", observaciones: "Pendiente de fecha de visita ya que no ha estado"},
-            {id: 29, nombre: "Dr Juan Lizandro", telefono: "4149-4479", direccion: "Zona 1, parque del calvario a la derecha", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
-            {id: 30, nombre: "Hospital Altuve", telefono: "7764-1436", direccion: "Zona 5, calzada", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "La Administradora no estaba atendiendo visita médica"}
-        ];
-
-        // Datos de clientes - Aledaños Xela (solo primeros 10 para ejemplo)
-        const clientesAledanosXela = [
-            {id: 31, nombre: "Farmacia RS", telefono: "4585-6535", direccion: "Al lado del parque donde hay mercado, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "Descarte para la siguiente visita"},
-            {id: 32, nombre: "Farmacia Verbo", telefono: "5033-3435", direccion: "Una calle de retorno a Huehue a mano derecha, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
-            {id: 33, nombre: "Dr Gerber Capriel", telefono: "5705-1503", direccion: "Salida hacia Cuilco, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "No estan comprando"},
-            {id: 34, nombre: "Farmacia La Paz", telefono: "4603-2453", direccion: "Colotenango, frente al parqueo municipal", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
-            {id: 35, nombre: "Alejandro Sanchez", telefono: "5808-1048", direccion: "carretera de salida hacia huehuetenango, Cuilco", municipio: "Cuilco", region: "Aledaños Xela", potencia: "Alta", observaciones: "Compro Aspek"},
-            {id: 36, nombre: "Dr Nerio Castillo", telefono: "5033-3435", direccion: "una calle a la derecha del parque municipal, Ixthahuacán", municipio: "Ixthahuacán", region: "Aledaños Xela", potencia: "Baja", observaciones: "No está comprando medicamento"},
-            {id: 37, nombre: "Sebastina", telefono: "3056-6648", direccion: "Frente al parque, San Sebastián", municipio: "San Sebastián", region: "Aledaños Xela", potencia: "Baja", observaciones: "Tiene Kaizezol todavía"},
-            {id: 38, nombre: "Dr Renigio", telefono: "4760-2300", direccion: "San Juan Atitan, en aldra Santa Isabel", municipio: "San Juan Atitan", region: "Aledaños Xela", potencia: "Media", observaciones: "Está en construcción de hospital en aldea Santa Isabel"},
-            {id: 39, nombre: "Farmacia San Miguel", telefono: "3252-4696", direccion: "a orilla de carretera interamericana, Pologua", municipio: "Pologua", region: "Aledaños Xela", potencia: "Baja", observaciones: "Tenía cerrada su farmacia"},
-            {id: 40, nombre: "Farmacia Israel", telefono: "3013-0095", direccion: "calle principal pologua, Pologua", municipio: "Pologua", region: "Aledaños Xela", potencia: "Alta", observaciones: "Abono a su factura"}
-        ];
-
-        // Combinar todos los clientes
-        const todosClientes = [
-            ...clientesMontanaBaja,
-            ...clientesMontanaAlta,
-            ...clientesHuehuetenango,
-            ...clientesAledanosXela
+            {id: 16, nombre: "Dr Pablo Elías", telefono: "4151-9004", direccion: "Zona 8, camino al semaforo", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Media", observaciones: "Aún en proceso de que tenga un espacio para comprar"},
+            {id: 17, nombre: "Dr Brayan Gómez", telefono: "5198-9469", direccion: "Zona 11, al lado de distribuidora la bendicion", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Aún tiene medicamento"},
+            {id: 18, nombre: "Dr Aarón", telefono: "5052-5292", direccion: "Zona 5, al lado del colegio palabra en acción", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Lo visité en Chiantla, pero tienen medicamento"},
+            {id: 19, nombre: "Dr Abdias Martínez", telefono: "7913-9462", direccion: "Zona 11, semáforo de vitatrac a la izquierda", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Baja", observaciones: "Creo que 3 visitas más y dejo de visitarlo"},
+            {id: 20, nombre: "Dr Julio Octavio", telefono: "3883 1442", direccion: "Zona 11, zentroplaza camino a intervida", municipio: "Huehuetenango", region: "Huehuetenango Cabecera", potencia: "Alta", observaciones: "Compro Medicamento"},
+            {id: 21, nombre: "Farmacia RS", telefono: "4585-6535", direccion: "Al lado del parque donde hay mercado, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "Descarte para la siguiente visita"},
+            {id: 22, nombre: "Farmacia Verbo", telefono: "5033-3435", direccion: "Una calle de retorno a Huehue a mano derecha, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
+            {id: 23, nombre: "Dr Gerber Capriel", telefono: "5705-1503", direccion: "Salida hacia Cuilco, Colotenango", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Baja", observaciones: "No estan comprando"},
+            {id: 24, nombre: "Farmacia La Paz", telefono: "4603-2453", direccion: "Colotenango, frente al parqueo municipal", municipio: "Colotenango", region: "Aledaños Xela", potencia: "Alta", observaciones: "Pago su factura"},
+            {id: 25, nombre: "Alejandro Sanchez", telefono: "5808-1048", direccion: "carretera de salida hacia huehuetenango, Cuilco", municipio: "Cuilco", region: "Aledaños Xela", potencia: "Alta", observaciones: "Compro Aspek"}
         ];
 
         // Generar visitas para cada cliente (5 visitas por cliente)
-        const todasLasVisitas = [];
-        
-        // Productos disponibles
+        const visitas = [];
         const productos = ["Kaizezol", "Dastyl C", "Aspek", "Celecoxib", "Pantoprazol", "Arginina"];
-        
-        // Resultados posibles
         const resultados = ["Venta", "Seguimiento", "No atendido", "Cancelado"];
         
         // Generar fechas aleatorias en los últimos 6 meses
@@ -966,24 +891,24 @@
         
         // Generar hora aleatoria entre 8:00 y 17:00
         function generarHoraAleatoria() {
-            const hora = Math.floor(Math.random() * 9) + 8; // 8-16
-            const minuto = Math.floor(Math.random() * 60); // 0-59
+            const hora = Math.floor(Math.random() * 9) + 8;
+            const minuto = Math.floor(Math.random() * 60);
             return `${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}`;
         }
         
         // Generar duración aleatoria entre 15 y 45 minutos
         function generarDuracion() {
-            return Math.floor(Math.random() * 31) + 15; // 15-45 minutos
+            return Math.floor(Math.random() * 31) + 15;
         }
         
         // Generar tiempo de espera aleatorio entre 0 y 20 minutos
         function generarTiempoEspera() {
-            return Math.floor(Math.random() * 21); // 0-20 minutos
+            return Math.floor(Math.random() * 21);
         }
         
         // Generar productos aleatorios
         function generarProductos() {
-            const numProductos = Math.floor(Math.random() * 3) + 1; // 1-3 productos
+            const numProductos = Math.floor(Math.random() * 3) + 1;
             const productosSeleccionados = [];
             
             for (let i = 0; i < numProductos; i++) {
@@ -997,7 +922,7 @@
         }
         
         // Generar visitas para todos los clientes
-        todosClientes.forEach(cliente => {
+        clientes.forEach(cliente => {
             for (let i = 0; i < 5; i++) {
                 const fecha = generarFechaAleatoria();
                 const horaInicio = generarHoraAleatoria();
@@ -1014,8 +939,8 @@
                 const horaFinM = totalMinutos % 60;
                 const horaFin = `${horaFinH.toString().padStart(2, '0')}:${horaFinM.toString().padStart(2, '0')}`;
                 
-                todasLasVisitas.push({
-                    id: todasLasVisitas.length + 1,
+                visitas.push({
+                    id: visitas.length + 1,
                     idCliente: cliente.id,
                     fecha: fecha,
                     horaInicio: horaInicio,
@@ -1037,16 +962,16 @@
             // Título
             doc.setFontSize(18);
             doc.setTextColor(44, 62, 80);
-            doc.text('REPORTE DE CLIENTES - KAIZEN', 105, 15, null, null, 'center');
+            doc.text('REPORTE DE CLIENTES - KAIZEN', 105, 15, { align: 'center' });
             
             // Fecha
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, null, null, 'center');
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, { align: 'center' });
             
             // Tabla de clientes
             const headers = [['Nombre', 'Teléfono', 'Dirección', 'Municipio', 'Región', 'Potencial']];
-            const data = todosClientes.map(cliente => [
+            const data = clientes.map(cliente => [
                 cliente.nombre,
                 cliente.telefono,
                 cliente.direccion,
@@ -1077,8 +1002,8 @@
                 doc.setPage(i);
                 doc.setFontSize(8);
                 doc.setTextColor(100, 100, 100);
-                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
-                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, { align: 'center' });
             }
             
             doc.save('clientes_kaizen.pdf');
@@ -1086,7 +1011,7 @@
 
         function exportClientesExcel() {
             // Preparar datos
-            const data = todosClientes.map(cliente => ({
+            const data = clientes.map(cliente => ({
                 'Nombre': cliente.nombre,
                 'Teléfono': cliente.telefono,
                 'Dirección': cliente.direccion,
@@ -1114,17 +1039,17 @@
             // Título
             doc.setFontSize(18);
             doc.setTextColor(44, 62, 80);
-            doc.text('HISTORIAL DE VISITAS - KAIZEN', 105, 15, null, null, 'center');
+            doc.text('HISTORIAL DE VISITAS - KAIZEN', 105, 15, { align: 'center' });
             
             // Fecha
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, null, null, 'center');
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 22, { align: 'center' });
             
             // Tabla de visitas
             const headers = [['Fecha', 'Cliente', 'Duración (min)', 'Tiempo Espera (min)', 'Resultado', 'Productos']];
-            const data = todasLasVisitas.map(visita => {
-                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+            const data = visitas.map(visita => {
+                const cliente = clientes.find(c => c.id === visita.idCliente);
                 return [
                     visita.fecha,
                     cliente ? cliente.nombre : 'N/A',
@@ -1157,8 +1082,8 @@
                 doc.setPage(i);
                 doc.setFontSize(8);
                 doc.setTextColor(100, 100, 100);
-                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
-                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, { align: 'center' });
             }
             
             doc.save('visitas_kaizen.pdf');
@@ -1166,8 +1091,8 @@
 
         function exportVisitasExcel() {
             // Preparar datos
-            const data = todasLasVisitas.map(visita => {
-                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+            const data = visitas.map(visita => {
+                const cliente = clientes.find(c => c.id === visita.idCliente);
                 return {
                     'Fecha': visita.fecha,
                     'Cliente': cliente ? cliente.nombre : 'N/A',
@@ -1199,19 +1124,19 @@
             // Página 1: Clientes
             doc.setFontSize(18);
             doc.setTextColor(44, 62, 80);
-            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, null, null, 'center');
+            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, { align: 'center' });
             
             doc.setFontSize(14);
-            doc.text('LISTA DE CLIENTES', 105, 25, null, null, 'center');
+            doc.text('LISTA DE CLIENTES', 105, 25, { align: 'center' });
             
             // Fecha
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 32, null, null, 'center');
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-GT')}`, 105, 32, { align: 'center' });
             
             // Tabla de clientes
             const clientesHeaders = [['Nombre', 'Teléfono', 'Dirección', 'Municipio', 'Región', 'Potencial']];
-            const clientesData = todosClientes.map(cliente => [
+            const clientesData = clientes.map(cliente => [
                 cliente.nombre,
                 cliente.telefono,
                 cliente.direccion,
@@ -1240,15 +1165,15 @@
             
             doc.setFontSize(18);
             doc.setTextColor(44, 62, 80);
-            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, null, null, 'center');
+            doc.text('REPORTE COMPLETO - KAIZEN', 105, 15, { align: 'center' });
             
             doc.setFontSize(14);
-            doc.text('HISTORIAL DE VISITAS', 105, 25, null, null, 'center');
+            doc.text('HISTORIAL DE VISITAS', 105, 25, { align: 'center' });
             
             // Tabla de visitas
             const visitasHeaders = [['Fecha', 'Cliente', 'Duración (min)', 'Resultado', 'Productos']];
-            const visitasData = todasLasVisitas.map(visita => {
-                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+            const visitasData = visitas.map(visita => {
+                const cliente = clientes.find(c => c.id === visita.idCliente);
                 return [
                     visita.fecha,
                     cliente ? cliente.nombre : 'N/A',
@@ -1279,8 +1204,8 @@
                 doc.setPage(i);
                 doc.setFontSize(8);
                 doc.setTextColor(100, 100, 100);
-                doc.text(`Página ${i} de ${pageCount}`, 105, 285, null, null, 'center');
-                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, null, null, 'center');
+                doc.text(`Página ${i} de ${pageCount}`, 105, 285, { align: 'center' });
+                doc.text('Sistema de Gestión de Clientes - KAIZEN', 105, 290, { align: 'center' });
             }
             
             doc.save('reporte_completo_kaizen.pdf');
@@ -1291,7 +1216,7 @@
             const wb = XLSX.utils.book_new();
             
             // Hoja 1: Clientes
-            const clientesData = todosClientes.map(cliente => ({
+            const clientesData = clientes.map(cliente => ({
                 'Nombre': cliente.nombre,
                 'Teléfono': cliente.telefono,
                 'Dirección': cliente.direccion,
@@ -1305,8 +1230,8 @@
             XLSX.utils.book_append_sheet(wb, clientesWs, 'Clientes');
             
             // Hoja 2: Visitas
-            const visitasData = todasLasVisitas.map(visita => {
-                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+            const visitasData = visitas.map(visita => {
+                const cliente = clientes.find(c => c.id === visita.idCliente);
                 return {
                     'Fecha': visita.fecha,
                     'Cliente': cliente ? cliente.nombre : 'N/A',
@@ -1325,12 +1250,12 @@
             
             // Hoja 3: Resumen
             const resumenData = [
-                {'Métrica': 'Total Clientes', 'Valor': todosClientes.length},
-                {'Métrica': 'Clientes Alta Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Alta').length},
-                {'Métrica': 'Clientes Media Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Media').length},
-                {'Métrica': 'Clientes Baja Potencia', 'Valor': todosClientes.filter(c => c.potencia === 'Baja').length},
-                {'Métrica': 'Total Visitas', 'Valor': todasLasVisitas.length},
-                {'Métrica': 'Visitas con Venta', 'Valor': todasLasVisitas.filter(v => v.resultado === 'Venta').length},
+                {'Métrica': 'Total Clientes', 'Valor': clientes.length},
+                {'Métrica': 'Clientes Alta Potencia', 'Valor': clientes.filter(c => c.potencia === 'Alta').length},
+                {'Métrica': 'Clientes Media Potencia', 'Valor': clientes.filter(c => c.potencia === 'Media').length},
+                {'Métrica': 'Clientes Baja Potencia', 'Valor': clientes.filter(c => c.potencia === 'Baja').length},
+                {'Métrica': 'Total Visitas', 'Valor': visitas.length},
+                {'Métrica': 'Visitas con Venta', 'Valor': visitas.filter(v => v.resultado === 'Venta').length},
                 {'Métrica': 'Región con Más Clientes', 'Valor': 'Montaña Alta'},
                 {'Métrica': 'Producto Más Vendido', 'Valor': 'Kaizezol'}
             ];
@@ -1357,6 +1282,7 @@
             cargarHistorialVisitas();
             cargarClientesAltaPotencia();
             cargarProximasVisitas();
+            cargarEstadisticas();
             
             // Configurar event listeners
             configurarEventListeners();
@@ -1410,7 +1336,7 @@
                 data: {
                     labels: ['Montaña Baja', 'Montaña Alta', 'Huehuetenango', 'Aledaños Xela'],
                     datasets: [{
-                        data: [10, 10, 10, 10],
+                        data: [10, 7, 5, 3],
                         backgroundColor: [
                             '#3498db',
                             '#2ecc71',
@@ -1438,7 +1364,11 @@
                     labels: ['Alta', 'Media', 'Baja'],
                     datasets: [{
                         label: 'Clientes por Potencial',
-                        data: [12, 14, 14],
+                        data: [
+                            clientes.filter(c => c.potencia === 'Alta').length,
+                            clientes.filter(c => c.potencia === 'Media').length,
+                            clientes.filter(c => c.potencia === 'Baja').length
+                        ],
                         backgroundColor: [
                             'rgba(39, 174, 96, 0.7)',
                             'rgba(243, 156, 18, 0.7)',
@@ -1502,15 +1432,15 @@
                 }
             });
 
-            // Gráfico de municipios
+            // Gráfico de municipios (corregido para Chart.js v3+)
             const ctxMunicipio = document.getElementById('municipioChart').getContext('2d');
             new Chart(ctxMunicipio, {
-                type: 'horizontalBar',
+                type: 'bar',
                 data: {
-                    labels: ['Huehuetenango', 'Aguacatan', 'Chiantla', 'La Democracia', 'San Pedro Necta', 'Colotenango', 'San Antonio Huista', 'Camoja Grande'],
+                    labels: ['Huehuetenango', 'Aguacatan', 'La Democracia', 'San Pedro Necta', 'Colotenango', 'San Antonio Huista', 'Camoja Grande', 'Santa Ana Huista'],
                     datasets: [{
                         label: 'Clientes por Municipio',
-                        data: [10, 7, 5, 5, 4, 4, 3, 2],
+                        data: [5, 4, 4, 3, 3, 2, 2, 2],
                         backgroundColor: 'rgba(52, 152, 219, 0.7)',
                         borderColor: '#3498db',
                         borderWidth: 1
@@ -1559,7 +1489,7 @@
             const tbody = document.getElementById('clientTable');
             tbody.innerHTML = '';
             
-            todosClientes.forEach(cliente => {
+            clientes.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.className = 'client-row';
                 tr.setAttribute('data-id', cliente.id);
@@ -1570,7 +1500,7 @@
                 else if (cliente.potencia === 'Media') badgeClass = 'badge-potencia-media';
                 
                 // Obtener última visita
-                const visitasCliente = todasLasVisitas.filter(v => v.idCliente === cliente.id);
+                const visitasCliente = visitas.filter(v => v.idCliente === cliente.id);
                 visitasCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
                 const ultimaVisita = visitasCliente.length > 0 ? visitasCliente[0].fecha : 'Nunca';
                 
@@ -1593,7 +1523,7 @@
             });
             
             // Actualizar contador
-            document.getElementById('clientCount').textContent = `${todosClientes.length} clientes`;
+            document.getElementById('clientCount').textContent = `${clientes.length} clientes`;
             
             // Configurar event listeners para los botones de ver cliente
             document.querySelectorAll('.view-client').forEach(button => {
@@ -1609,10 +1539,10 @@
             const clientesHoy = [];
             const indicesUsados = [];
             
-            while (clientesHoy.length < 6 && indicesUsados.length < todosClientes.length) {
-                const indice = Math.floor(Math.random() * todosClientes.length);
+            while (clientesHoy.length < 6 && indicesUsados.length < clientes.length) {
+                const indice = Math.floor(Math.random() * clientes.length);
                 if (!indicesUsados.includes(indice)) {
-                    clientesHoy.push(todosClientes[indice]);
+                    clientesHoy.push(clientes[indice]);
                     indicesUsados.push(indice);
                 }
             }
@@ -1649,7 +1579,7 @@
                             <p class="card-text mb-1"><strong>Horario:</strong> ${horaActual} - ${horaFin}</p>
                             <p class="card-text mb-1"><strong>Duración:</strong> ${duracion} min</p>
                             <p class="card-text"><strong>Tiempo de viaje:</strong> ${index === 0 ? 'Inicio del día' : tiempoViaje + ' min'}</p>
-                            <button class="btn btn-sm btn-outline-primary">Ver detalles</button>
+                            <button class="btn btn-sm btn-outline-primary view-client" data-id="${cliente.id}">Ver detalles</button>
                         </div>
                     </div>
                 `;
@@ -1662,7 +1592,7 @@
             
             // Actualizar resumen del día
             document.getElementById('totalClientsDay').textContent = clientesHoy.length;
-            document.getElementById('totalTimeDay').textContent = '4h 30m'; // Valor fijo por simplicidad
+            document.getElementById('totalTimeDay').textContent = '4h 30m';
             
             // Cargar clientes para mañana
             const tomorrowList = document.getElementById('tomorrowVisits');
@@ -1672,10 +1602,10 @@
             const clientesManana = [];
             const indicesManana = [];
             
-            while (clientesManana.length < 4 && indicesManana.length < todosClientes.length) {
-                const indice = Math.floor(Math.random() * todosClientes.length);
+            while (clientesManana.length < 4 && indicesManana.length < clientes.length) {
+                const indice = Math.floor(Math.random() * clientes.length);
                 if (!indicesManana.includes(indice) && !indicesUsados.includes(indice)) {
-                    clientesManana.push(todosClientes[indice]);
+                    clientesManana.push(clientes[indice]);
                     indicesManana.push(indice);
                 }
             }
@@ -1689,6 +1619,14 @@
                 `;
                 tomorrowList.appendChild(li);
             });
+
+            // Agregar event listeners a los botones de ver cliente en el timeline
+            document.querySelectorAll('#visitTimeline .view-client').forEach(button => {
+                button.addEventListener('click', function() {
+                    const clientId = this.getAttribute('data-id');
+                    mostrarDetallesCliente(clientId);
+                });
+            });
         }
 
         function cargarHistorialVisitas() {
@@ -1696,10 +1634,10 @@
             tbody.innerHTML = '';
             
             // Mostrar solo las primeras 10 visitas por simplicidad
-            const visitasMostrar = todasLasVisitas.slice(0, 10);
+            const visitasMostrar = visitas.slice(0, 10);
             
             visitasMostrar.forEach(visita => {
-                const cliente = todosClientes.find(c => c.id === visita.idCliente);
+                const cliente = clientes.find(c => c.id === visita.idCliente);
                 if (!cliente) return;
                 
                 const tr = document.createElement('tr');
@@ -1725,13 +1663,13 @@
             });
             
             // Actualizar contador
-            document.getElementById('historyCount').textContent = `${todasLasVisitas.length} visitas`;
+            document.getElementById('historyCount').textContent = `${visitas.length} visitas`;
             
             // Llenar select de clientes para filtro
             const selectClient = document.getElementById('historialClient');
             selectClient.innerHTML = '<option value="">Todos los clientes</option>';
             
-            todosClientes.forEach(cliente => {
+            clientes.forEach(cliente => {
                 const option = document.createElement('option');
                 option.value = cliente.id;
                 option.textContent = cliente.nombre;
@@ -1743,7 +1681,7 @@
             const highPotentialList = document.getElementById('highPotentialClients');
             highPotentialList.innerHTML = '';
             
-            const clientesAltaPotencia = todosClientes.filter(c => c.potencia === 'Alta');
+            const clientesAltaPotencia = clientes.filter(c => c.potencia === 'Alta');
             
             // Mostrar solo los primeros 8
             clientesAltaPotencia.slice(0, 8).forEach(cliente => {
@@ -1779,8 +1717,8 @@
                 const fecha = new Date(hoy);
                 fecha.setDate(hoy.getDate() + i);
                 
-                const clienteIndex = Math.floor(Math.random() * todosClientes.length);
-                const cliente = todosClientes[clienteIndex];
+                const clienteIndex = Math.floor(Math.random() * clientes.length);
+                const cliente = clientes[clienteIndex];
                 
                 proximasVisitas.push({
                     fecha: fecha.toISOString().split('T')[0],
@@ -1808,12 +1746,51 @@
             });
         }
 
+        function cargarEstadisticas() {
+            // Actualizar estadísticas
+            document.getElementById('totalClientes').textContent = clientes.length;
+            document.getElementById('totalAltaPotencia').textContent = clientes.filter(c => c.potencia === 'Alta').length;
+            document.getElementById('totalVisitas').textContent = visitas.length;
+            
+            // Actualizar segmentación
+            document.getElementById('segmentoAlta').textContent = clientes.filter(c => c.potencia === 'Alta').length;
+            document.getElementById('segmentoMedia').textContent = clientes.filter(c => c.potencia === 'Media').length;
+            document.getElementById('segmentoBaja').textContent = clientes.filter(c => c.potencia === 'Baja').length;
+            
+            // Actualizar distribución por región
+            const regionDistribution = document.getElementById('regionDistribution');
+            regionDistribution.innerHTML = '';
+            
+            const regiones = ['Montaña Baja', 'Montaña Alta', 'Huehuetenango Cabecera', 'Aledaños Xela'];
+            
+            regiones.forEach(region => {
+                const clientesRegion = clientes.filter(c => c.region === region);
+                const porcentaje = Math.round((clientesRegion.length / clientes.length) * 100);
+                
+                let potencialPromedio = 'Baja';
+                const altaCount = clientesRegion.filter(c => c.potencia === 'Alta').length;
+                const mediaCount = clientesRegion.filter(c => c.potencia === 'Media').length;
+                
+                if (altaCount > mediaCount) potencialPromedio = 'Alta';
+                else if (mediaCount > altaCount) potencialPromedio = 'Media';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${region}</td>
+                    <td>${clientesRegion.length}</td>
+                    <td>${porcentaje}%</td>
+                    <td><span class="badge ${potencialPromedio === 'Alta' ? 'bg-success' : potencialPromedio === 'Media' ? 'bg-warning' : 'bg-danger'}">${potencialPromedio}</span></td>
+                `;
+                regionDistribution.appendChild(tr);
+            });
+        }
+
         function mostrarDetallesCliente(id) {
-            const cliente = todosClientes.find(c => c.id === parseInt(id));
+            const cliente = clientes.find(c => c.id === parseInt(id));
             if (!cliente) return;
             
             // Obtener visitas del cliente
-            const visitasCliente = todasLasVisitas.filter(v => v.idCliente === parseInt(id));
+            const visitasCliente = visitas.filter(v => v.idCliente === parseInt(id));
             visitasCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
             
             // Llenar modal con información del cliente
@@ -1883,16 +1860,35 @@
             });
             
             // Exportación
-            document.getElementById('exportPdfClientesTop').addEventListener('click', exportClientesPDF);
-            document.getElementById('exportPdfClientes').addEventListener('click', exportClientesPDF);
-            document.getElementById('exportExcelClientesTop').addEventListener('click', exportClientesExcel);
-            document.getElementById('exportExcelClientes').addEventListener('click', exportClientesExcel);
-            document.getElementById('exportPdfVisitasTop').addEventListener('click', exportVisitasPDF);
-            document.getElementById('exportPdfVisitas').addEventListener('click', exportVisitasPDF);
-            document.getElementById('exportExcelVisitasTop').addEventListener('click', exportVisitasExcel);
-            document.getElementById('exportExcelVisitas').addEventListener('click', exportVisitasExcel);
-            document.getElementById('exportPdfCompleto').addEventListener('click', exportCompletoPDF);
-            document.getElementById('exportExcelCompleto').addEventListener('click', exportCompletoExcel);
+            document.querySelectorAll('.export-action').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    manejarExportacion(type);
+                });
+            });
+        }
+
+        function manejarExportacion(type) {
+            switch(type) {
+                case 'clientes-pdf':
+                    exportClientesPDF();
+                    break;
+                case 'clientes-excel':
+                    exportClientesExcel();
+                    break;
+                case 'visitas-pdf':
+                    exportVisitasPDF();
+                    break;
+                case 'visitas-excel':
+                    exportVisitasExcel();
+                    break;
+                case 'completo-pdf':
+                    exportCompletoPDF();
+                    break;
+                case 'completo-excel':
+                    exportCompletoExcel();
+                    break;
+            }
         }
 
         function filtrarClientes() {
